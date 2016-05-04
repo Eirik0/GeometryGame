@@ -152,7 +152,8 @@ public class SquareRoot implements Constructible {
 
 	@Override
 	public double doubleValue() {
-		return Math.sqrt(coefficient.squared().multiply(radicand).doubleValue());
+		double magnitude = Math.sqrt(coefficient.squared().multiply(radicand).doubleValue());
+		return signum() == -1 ? -magnitude : magnitude;
 	}
 
 	@Override

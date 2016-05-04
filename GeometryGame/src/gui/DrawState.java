@@ -1,11 +1,10 @@
-package graphics;
+package gui;
 
 import java.awt.Color;
 import java.util.function.Consumer;
 
 import algebraic.Pair;
 import geometric.CPoint;
-import input.UserInputBridge.UserEvent;
 
 public class DrawState implements ConstructionUIState {
 	private final ConstructionUI ui;
@@ -23,6 +22,7 @@ public class DrawState implements ConstructionUIState {
 	public void handleEvent(UserEvent event, int x, int y) {
 		switch (event) {
 		case MOUSE_MOVED:
+		case MOUSE_DRAGGED:
 			nearestIntersection = ui.findIntersectionNearest(x, y);
 			break;
 		case LEFT_CLICK_RELEASED:

@@ -1,6 +1,4 @@
-package graphics;
-
-import input.UserInputBridge.UserEvent;
+package gui;
 
 public interface ConstructionUIState {
 	public void handleEvent(UserEvent event, int x, int y);

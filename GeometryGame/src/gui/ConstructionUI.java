@@ -1,8 +1,4 @@
-package graphics;
-
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
+package gui;
 
 import algebraic.SquareRoot;
 import construction.Construction;
@@ -14,15 +10,8 @@ import geometric.HorizontalLine;
 import geometric.LineOrCircle;
 import geometric.SlopedLine;
 import geometric.VerticalLine;
-import input.UserInputBridge.UserEvent;
 
 public class ConstructionUI {
-	public static final int DEFAULT_IMAGE_WIDTH = 1024;
-	public static final int DEFAULT_IMAGE_HEIGHT = 768;
-
-	public static final Color INTERSECTION_COLOR = Color.BLACK;
-	public static final Color LINE_AND_CIRCLE_COLOR = Color.GRAY;
-
 	private final Construction construction;
 
 	public final ConstructionImage image;
@@ -36,7 +25,6 @@ public class ConstructionUI {
 	private double pixelsPerUnit;
 
 	private ConstructionUIState state;
-	public final List<CButton> buttons;
 
 	public ConstructionUI(Construction construction, ConstructionImage image) {
 		this.construction = construction;
@@ -47,11 +35,16 @@ public class ConstructionUI {
 		constructionHeight = image.getHeight() / pixelsPerUnit;
 		y0 = -constructionHeight / 2;
 		state = new ReadyToDrawState(this);
-		buttons = new ArrayList<>();
-		// Draw Line button
-		buttons.add(new DrawButton(1.0 / 8, () -> state = new DrawState(this, ps -> construction.draw(CLine.newLine(ps.first, ps.second)))));
-		// Draw Circle button
-		buttons.add(new DrawButton(5.0 / 8, () -> state = new DrawState(this, ps -> construction.draw(new CCircle(ps.first, ps.second)))));
+	}
+
+	public void setSize(int width, int height) {
+		double dx = (width - image.getWidth()) / pixelsPerUnit;
+		double dy = (height - image.getHeight()) / pixelsPerUnit;
+		constructionWidth += dx;
+		constructionHeight += dy;
+		x0 -= dx / 2;
+		y0 -= dy / 2;
+		image.setSize(width, height);
 	}
 
 	public void handleEvent(UserEvent event, int x, int y) {
@@ -60,6 +53,10 @@ public class ConstructionUI {
 
 	public void setState(ConstructionUIState state) {
 		this.state = state;
+	}
+
+	public void addLineOrCircle(LineOrCircle lineOrCircle) {
+		construction.draw(lineOrCircle);
 	}
 
 	public void zoom(double zoom) {
@@ -84,11 +81,13 @@ public class ConstructionUI {
 	}
 
 	public void draw() {
+		image.setColor(ConstructionColors.getBackgroundColor());
+		image.fillRectangle(0, 0, image.getWidth(), image.getHeight());
 		state.draw();
 	}
 
 	public void drawLinesAndCircles() {
-		image.setColor(LINE_AND_CIRCLE_COLOR);
+		image.setColor(ConstructionColors.getLineAndCircleColor());
 		for (LineOrCircle lineOrCircle : construction.getLinesAndCircles()) {
 			if (lineOrCircle instanceof CLine) {
 				LineType lineType = ((CLine) lineOrCircle).getType();
@@ -124,25 +123,29 @@ public class ConstructionUI {
 		// x = (y - b)/m
 		int x_y0 = transformX((y0 - b) / m);
 		int x_y1 = transformX(((y0 + constructionHeight) - b) / m);
-		boolean intersectsWest = y_x0 >= 0 && y_x0 <= image.getHeight();
-		boolean intersectsSouth = x_y0 >= 0 && x_y0 <= image.getWidth();
-		boolean intersectsEast = y_x1 >= 0 && y_x1 <= image.getHeight();
+		//   N
+		// W   E
+		//   S
+		boolean intersectsWest = y_x0 >= 0 && y_x0 <= image.getHeight(); // (0, y_x0)
+		boolean intersectsNorth = x_y0 >= 0 && x_y0 <= image.getWidth(); // (x_y0, 0)
+		boolean intersectsEast = y_x1 >= 0 && y_x1 <= image.getHeight(); // (width, y_x1)
+		// default intersects south (x_y1, height)
 		if (intersectsWest) {
-			if (intersectsSouth) {
-				image.drawLine(0, y_x0, x_y0, -y_x0);
+			if (intersectsNorth) {
+				image.drawLine(0, y_x0, x_y0, 0);
 			} else if (intersectsEast) {
-				image.drawLine(0, y_x0, image.getWidth(), y_x1 - y_x0);
-			} else { // intersects north
-				image.drawLine(0, y_x0, x_y1, image.getHeight() - y_x0);
+				image.drawLine(0, y_x0, image.getWidth(), y_x1);
+			} else {
+				image.drawLine(0, y_x0, x_y1, image.getHeight());
 			}
-		} else if (intersectsSouth) {
+		} else if (intersectsNorth) {
 			if (intersectsEast) {
-				image.drawLine(x_y0, 0, image.getWidth() - x_y0, y_x1);
-			} else { // intersects north
-				image.drawLine(x_y0, 0, x_y1 - x_y0, image.getHeight());
+				image.drawLine(x_y0, 0, image.getWidth(), y_x1);
+			} else {
+				image.drawLine(x_y0, 0, x_y1, image.getHeight());
 			}
-		} else if (intersectsEast) { // intersects north
-			image.drawLine(x_y1, image.getHeight(), image.getWidth() - x_y1, y_x1 - image.getHeight());
+		} else if (intersectsEast) {
+			image.drawLine(image.getWidth(), y_x1, x_y1, image.getHeight());
 		}
 	}
 
@@ -155,15 +158,9 @@ public class ConstructionUI {
 	}
 
 	public void drawIntersections() {
-		image.setColor(INTERSECTION_COLOR);
+		image.setColor(ConstructionColors.getIntersectionColor());
 		for (CPoint intersection : construction.getIntersections()) {
 			image.drawPoint(transformX(intersection.x.doubleValue()), transformY(intersection.y.doubleValue()));
-		}
-	}
-
-	public void drawButtons() {
-		for (CButton button : buttons) {
-			button.drawOn(image);
 		}
 	}
 
@@ -172,7 +169,7 @@ public class ConstructionUI {
 		CPoint minPoint = null;
 		for (CPoint point : construction.getIntersections()) {
 			double dx = (transformX(point.x.doubleValue()) - x);
-			double dy = (transformX(point.y.doubleValue()) - y);
+			double dy = (transformY(point.y.doubleValue()) - y);
 			double distance = Math.sqrt(dx * dx + dy * dy);
 			if (distance < minDistance) {
 				minDistance = distance;

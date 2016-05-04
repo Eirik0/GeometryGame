@@ -166,6 +166,7 @@ public class SquareRootTest {
 	public void testDoubleValue() {
 		assertEquals(1.414, SquareRoot.of(2).doubleValue(), 0.001);
 		assertEquals(2.828, SquareRoot.of(8).doubleValue(), 0.001);
+		assertEquals(-2.828, SquareRoot.of(8).negate().doubleValue(), 0.001);
 	}
 
 	@Test

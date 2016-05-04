@@ -1,11 +1,11 @@
-package graphics;
+package gui;
 
 public interface CButton {
 	public Runnable getAction();
 
 	public ButtonDimension getDimension(ConstructionImage image);
 
-	public void drawOn(ConstructionImage image);
+	public void drawOn(ConstructionImage image, boolean highlight, boolean depressed);
 
 	public default boolean contains(ConstructionImage image, int x, int y) {
 		ButtonDimension location = getDimension(image);

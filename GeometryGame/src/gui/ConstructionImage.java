@@ -1,4 +1,4 @@
-package graphics;
+package gui;
 
 import java.awt.Color;
 
@@ -18,4 +18,8 @@ public interface ConstructionImage {
 	public void drawCircle(int x, int y, int width, int height);
 
 	public void drawRectangle(int x, int y, int width, int height);
+
+	public void fillRectangle(int x, int y, int width, int height);
+
+	public void drawCenteredString(int x, int y, String text);
 }
