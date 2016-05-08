@@ -14,7 +14,6 @@ public class CCircle implements LineOrCircle {
 	public CCircle(CPoint center, CPoint radial) {
 		h = center.x;
 		k = center.y;
-
 		Constructible x2_sub_x1 = radial.x.subtract(center.x);
 		Constructible y2_sub_y1 = radial.y.subtract(center.y);
 		rSquared = x2_sub_x1.squared().add(y2_sub_y1.squared());
@@ -31,8 +30,12 @@ public class CCircle implements LineOrCircle {
 		Constructible k2_sub_k1 = circle.k.subtract(k);
 		Constructible r1Sq_sub_r2Sq = rSquared.subtract(circle.rSquared);
 		if (h1_sub_h2.equals(ZInteger.ZERO)) {
-			Constructible y = r1Sq_sub_r2Sq.add(circle.k.squared()).subtract(k.squared()).divide(ZInteger.TWO.multiply(k2_sub_k1));
-			return HorizontalLine.findIntersection(y, h, k, rSquared);
+			if (k2_sub_k1.equals(ZInteger.ZERO)) {
+				return IntersectionSet.emptySet();
+			} else {
+				Constructible y = r1Sq_sub_r2Sq.add(circle.k.squared()).subtract(k.squared()).divide(ZInteger.TWO.multiply(k2_sub_k1));
+				return HorizontalLine.findIntersection(y, h, k, rSquared);
+			}
 		} else if (k2_sub_k1.equals(ZInteger.ZERO)) {
 			Constructible x = r1Sq_sub_r2Sq.add(circle.h.squared()).subtract(h.squared()).divide(ZInteger.TWO.multiply(h1_sub_h2.negate()));
 			return VerticalLine.findIntersection(x, h, k, rSquared);

@@ -125,4 +125,9 @@ public class CCircleTest {
 	public void testCircle_TwoPoints_Vertical() {
 		checkEqualIntersections(new IntersectionSet(CPoint.newPoint(6, 0), CPoint.newPoint(6, 8)), radiusFiveCircleAt(3, 4).findIntersection(radiusFiveCircleAt(9, 4)));
 	}
+
+	@Test
+	public void findIntersectionSameCenter() {
+		checkEqualIntersections(IntersectionSet.emptySet(), radiusFiveCircleAt(3, 4).findIntersection(new CCircle(CPoint.newPoint(3, 4), CPoint.newPoint(3, 10))));
+	}
 }
