@@ -1,5 +1,7 @@
 package gui;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Function;
 
 import algebraic.Pair;
@@ -12,6 +14,9 @@ public class DrawState implements ConstructionUIState {
 
 	private CPoint nearestIntersection;
 	private CPoint point1;
+
+	// XXX remove when nested square roots are implemented
+	private final Set<String> errorMessages = new HashSet<>();
 
 	public DrawState(ConstructionUI ui, Function<Pair<CPoint>, LineOrCircle> lineOrCircleFunction) {
 		this.ui = ui;
@@ -48,7 +53,13 @@ public class DrawState implements ConstructionUIState {
 			highlightIntersection(point1);
 			if (!point1.equals(nearestIntersection)) {
 				ui.image.setColor(ConstructionColors.getPreviewLineOrCircleColor());
-				ui.drawLineOrCircle(lineOrCircleFunction.apply(Pair.valueOf(point1, nearestIntersection)));
+				try {
+					ui.drawLineOrCircle(lineOrCircleFunction.apply(Pair.valueOf(point1, nearestIntersection)));
+				} catch (Exception e) {
+					if (errorMessages.add(e.getMessage())) {
+						System.out.println("Err: " + e.getMessage());
+					}
+				}
 			}
 		}
 	}

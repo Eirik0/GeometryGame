@@ -62,6 +62,18 @@ public class DrawStateTest {
 	}
 
 	@Test
+	public void testNoPreviewAtSamePoint() {
+		TestUI testUI = new TestUI();
+		testUI.moveLeftClickAndReleaseAt(TestUI.LINE_BUTTON_X, TestUI.LINE_BUTTON_Y);
+		testUI.moveLeftClickAndReleaseAt(341, 384);
+		testUI.ui.handleEvent(UserEvent.MOUSE_MOVED, 341, 341); // move to 2nd point
+		testUI.ui.draw();
+		assertEquals(1, testUI.image.circles.size());
+		assertTrue(testUI.image.circles.contains(new TestCircle(336, 379, 10, 10, ConstructionColors.getIntersectionSelectionColor())));
+		assertTrue(testUI.image.lines.isEmpty());
+	}
+
+	@Test
 	public void testZoomIn() {
 		TestUI testUI = new TestUI();
 		testUI.moveLeftClickAndReleaseAt(TestUI.LINE_BUTTON_X, TestUI.LINE_BUTTON_Y);
