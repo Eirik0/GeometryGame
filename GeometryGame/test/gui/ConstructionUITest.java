@@ -3,8 +3,11 @@ package gui;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Set;
+
 import org.junit.Test;
 
+import geometric.CLine;
 import geometric.CPoint;
 import gui.test.TestPoint;
 import gui.test.TestUI;
@@ -73,5 +76,21 @@ public class ConstructionUITest {
 		TestUI ui = new TestUI();
 		assertEquals(CPoint.newPoint(0, 0), ui.ui.findIntersectionNearest(511, 385));
 		assertEquals(CPoint.newPoint(1, 0), ui.ui.findIntersectionNearest(513, 385));
+	}
+
+	@Test
+	public void testFindAllowableSecondIntersections() {
+		TestUI ui = new TestUI();
+		Set<CPoint> intersections = ui.ui.findAllowableSecondIntersections(CPoint.newPoint(0, 0), CLine.NEW_LINE_FUNCTION);
+		assertEquals(1, intersections.size());
+		assertTrue(intersections.contains(CPoint.newPoint(1, 0)));
+	}
+
+	@Test
+	public void testFindNoAllowableSecondIntersections() {
+		TestUI ui = new TestUI();
+		ui.ui.addLineOrCircle(CLine.newLine(CPoint.newPoint(0, 0), CPoint.newPoint(1, 0)));
+		Set<CPoint> intersections = ui.ui.findAllowableSecondIntersections(CPoint.newPoint(0, 0), CLine.NEW_LINE_FUNCTION);
+		assertTrue(intersections.isEmpty());
 	}
 }

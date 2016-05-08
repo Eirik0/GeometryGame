@@ -1,6 +1,9 @@
 package geometric;
 
+import java.util.function.Function;
+
 import algebraic.Constructible;
+import algebraic.Pair;
 
 /**
  * A Line, constructible geometrically by the straightedge.<br>
@@ -12,6 +15,8 @@ public interface CLine extends LineOrCircle {
 	public static enum LineType {
 		HORIZONTAL, VERTICAL, SLOPED;
 	}
+
+	public static final Function<Pair<CPoint>, CLine> NEW_LINE_FUNCTION = points -> newLine(points.first, points.second);
 
 	/**
 	 * Given two points, this method finds and returns the appropriate type of line.

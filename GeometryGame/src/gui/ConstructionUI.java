@@ -1,5 +1,11 @@
 package gui;
 
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.function.Function;
+
+import algebraic.Pair;
 import algebraic.SquareRoot;
 import construction.Construction;
 import geometric.CCircle;
@@ -190,6 +196,21 @@ public class ConstructionUI {
 			}
 		}
 		return minPoint;
+	}
+
+	public Set<CPoint> findAllowableSecondIntersections(CPoint firstIntersection, Function<Pair<CPoint>, ? extends LineOrCircle> lineOrCircleFunction) {
+		Set<CPoint> intersections = new HashSet<>(construction.getIntersections());
+		intersections.remove(firstIntersection);
+		Iterator<CPoint> intersectionIter = intersections.iterator();
+		while (intersectionIter.hasNext()) {
+			CPoint secondIntersection = intersectionIter.next();
+			LineOrCircle apply = lineOrCircleFunction.apply(Pair.valueOf(firstIntersection, secondIntersection));
+			System.out.println(apply);
+			if (construction.getLinesAndCircles().contains(apply)) {
+				intersectionIter.remove();
+			}
+		}
+		return intersections;
 	}
 
 	public static int round(double d) {

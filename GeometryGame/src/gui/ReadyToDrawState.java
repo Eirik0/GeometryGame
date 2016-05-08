@@ -18,9 +18,9 @@ public class ReadyToDrawState implements ConstructionUIState {
 		userState = new UserState();
 		buttons = new ArrayList<>();
 		// Draw Line button
-		buttons.add(new DrawButton("LINE", 1.0 / 8, () -> ui.setState(new DrawState(ui, points -> CLine.newLine(points.first, points.second)))));
+		buttons.add(new DrawButton("LINE", 1.0 / 8, () -> ui.setState(new DrawState(ui, CLine.NEW_LINE_FUNCTION))));
 		// Draw Circle button
-		buttons.add(new DrawButton("CIRCLE", 5.0 / 8, () -> ui.setState(new DrawState(ui, points -> new CCircle(points.first, points.second)))));
+		buttons.add(new DrawButton("CIRCLE", 5.0 / 8, () -> ui.setState(new DrawState(ui, CCircle.NEW_CIRCLE_FUNCTION))));
 	}
 
 	@Override

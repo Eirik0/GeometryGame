@@ -1,12 +1,17 @@
 package geometric;
 
+import java.util.function.Function;
+
 import algebraic.Constructible;
+import algebraic.Pair;
 import algebraic.ZInteger;
 
 /**
  * (x - h)^2 + (y - k)^2 = r^2
  */
 public class CCircle implements LineOrCircle {
+	public static final Function<Pair<CPoint>, CCircle> NEW_CIRCLE_FUNCTION = points -> new CCircle(points.first, points.second);
+
 	public final Constructible h;
 	public final Constructible k;
 	public final Constructible rSquared;

@@ -35,8 +35,10 @@ public class ConstructionMouseAdapter extends MouseAdapter {
 	public void mouseReleased(MouseEvent e) {
 		if (SwingUtilities.isLeftMouseButton(e)) {
 			userInput.handleEvent(UserEvent.LEFT_CLICK_RELEASED, e.getX(), e.getY());
-			panel.repaint();
+		} else if (SwingUtilities.isRightMouseButton(e)) {
+			userInput.handleEvent(UserEvent.RIGHT_CLICK_RELEASED, e.getX(), e.getY());
 		}
+		panel.repaint();
 	}
 
 	@Override

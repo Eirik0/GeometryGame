@@ -74,6 +74,27 @@ public class DrawStateTest {
 	}
 
 	@Test
+	public void testPreventAddingInvalidLine() {
+		TestUI testUI = new TestUI();
+		testUI.moveLeftClickAndReleaseAt(TestUI.LINE_BUTTON_X, TestUI.LINE_BUTTON_Y);
+		testUI.moveLeftClickAndReleaseAt(341, 384);
+		testUI.moveLeftClickAndReleaseAt(341, 384);
+		testUI.ui.draw();
+		assertEquals(1, testUI.image.circles.size()); // this means we are still in DrawState
+		assertTrue(testUI.image.circles.contains(new TestCircle(336, 379, 10, 10, ConstructionColors.getIntersectionSelectionColor())));
+	}
+
+	@Test
+	public void testCancelDrawing() {
+		TestUI testUI = new TestUI();
+		testUI.moveLeftClickAndReleaseAt(TestUI.LINE_BUTTON_X, TestUI.LINE_BUTTON_Y);
+		testUI.moveLeftClickAndReleaseAt(341, 384);
+		testUI.ui.handleEvent(UserEvent.RIGHT_CLICK_RELEASED, 341, 384);
+		testUI.ui.draw();
+		assertTrue(testUI.image.circles.isEmpty()); // this means we are in ReadyToDrawState
+	}
+
+	@Test
 	public void testZoomIn() {
 		TestUI testUI = new TestUI();
 		testUI.moveLeftClickAndReleaseAt(TestUI.LINE_BUTTON_X, TestUI.LINE_BUTTON_Y);

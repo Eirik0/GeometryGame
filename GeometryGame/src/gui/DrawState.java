@@ -10,15 +10,17 @@ import geometric.LineOrCircle;
 
 public class DrawState implements ConstructionUIState {
 	private final ConstructionUI ui;
-	private final Function<Pair<CPoint>, LineOrCircle> lineOrCircleFunction;
+	private final Function<Pair<CPoint>, ? extends LineOrCircle> lineOrCircleFunction;
 
 	private CPoint nearestIntersection;
 	private CPoint point1;
 
+	private Set<CPoint> possibleSecondIntersections;
+
 	// XXX remove when nested square roots are implemented
 	private final Set<String> errorMessages = new HashSet<>();
 
-	public DrawState(ConstructionUI ui, Function<Pair<CPoint>, LineOrCircle> lineOrCircleFunction) {
+	public DrawState(ConstructionUI ui, Function<Pair<CPoint>, ? extends LineOrCircle> lineOrCircleFunction) {
 		this.ui = ui;
 		this.lineOrCircleFunction = lineOrCircleFunction;
 	}
@@ -34,10 +36,16 @@ public class DrawState implements ConstructionUIState {
 			nearestIntersection = ui.findIntersectionNearest(x, y);
 			if (point1 == null) {
 				point1 = nearestIntersection;
+				possibleSecondIntersections = ui.findAllowableSecondIntersections(point1, lineOrCircleFunction);
 			} else {
-				ui.addLineOrCircle(lineOrCircleFunction.apply(Pair.valueOf(point1, nearestIntersection)));
-				ui.setState(new ReadyToDrawState(ui));
+				if (possibleSecondIntersections.contains(nearestIntersection)) {
+					ui.addLineOrCircle(lineOrCircleFunction.apply(Pair.valueOf(point1, nearestIntersection)));
+					ui.setState(new ReadyToDrawState(ui));
+				}
 			}
+			break;
+		case RIGHT_CLICK_RELEASED:
+			ui.setState(new ReadyToDrawState(ui));
 			break;
 		default:
 		}
@@ -51,7 +59,7 @@ public class DrawState implements ConstructionUIState {
 			highlightIntersection(nearestIntersection);
 		} else {
 			highlightIntersection(point1);
-			if (!point1.equals(nearestIntersection)) {
+			if (possibleSecondIntersections.contains(nearestIntersection)) {
 				ui.image.setColor(ConstructionColors.getPreviewLineOrCircleColor());
 				try {
 					ui.drawLineOrCircle(lineOrCircleFunction.apply(Pair.valueOf(point1, nearestIntersection)));
