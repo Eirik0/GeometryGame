@@ -44,12 +44,7 @@ public class Series implements Constructible {
 	}
 
 	private Constructible addInteger(ZInteger addend) {
-		Constructible sumIntPart = integerPart.add(addend);
-		if (sumIntPart.equals(ZInteger.ZERO) && rootList.size() == 1) {
-			return rootList.get(0);
-		} else {
-			return new Series((ZInteger) sumIntPart, rootList);
-		}
+		return constructibleValue((ZInteger) integerPart.add(addend), rootList);
 	}
 
 	private Constructible addSquareRoot(SquareRoot addend) {
@@ -142,16 +137,23 @@ public class Series implements Constructible {
 	}
 
 	private Constructible multiplyInteger(ZInteger multiplier) {
-		List<SquareRoot> productRootList = new ArrayList<>();
-		for (SquareRoot squareRoot : rootList) {
-			productRootList.add(new SquareRoot((ZInteger) squareRoot.coefficient.multiply(multiplier), squareRoot.radicand));
+		if (multiplier.signum() == 0) {
+			return ZInteger.ZERO;
+		} else {
+			List<SquareRoot> productRootList = new ArrayList<>();
+			for (SquareRoot squareRoot : rootList) {
+				productRootList.add(new SquareRoot((ZInteger) squareRoot.coefficient.multiply(multiplier), squareRoot.radicand));
+			}
+			return new Series((ZInteger) integerPart.multiply(multiplier), productRootList);
 		}
-		return new Series((ZInteger) integerPart.multiply(multiplier), productRootList);
 	}
 
 	private Constructible multiplySquareRoot(SquareRoot multiplier) {
 		ZInteger productIntegerPart = ZInteger.ZERO;
 		List<SquareRoot> productRootList = new ArrayList<>();
+		if (integerPart.signum() != 0) { // nonzero coefficient
+			productRootList.add(new SquareRoot((ZInteger) integerPart.multiply(multiplier.coefficient), multiplier.radicand));
+		}
 		for (SquareRoot squareRoot : rootList) {
 			Constructible sqrtProduct = squareRoot.multiply(multiplier);
 			if (sqrtProduct.getType() == ConstructibleType.SQUARE_ROOT) {
@@ -160,7 +162,6 @@ public class Series implements Constructible {
 				productIntegerPart = (ZInteger) productIntegerPart.add(sqrtProduct);
 			}
 		}
-		productRootList.add(new SquareRoot((ZInteger) integerPart.multiply(multiplier.coefficient), multiplier.radicand));
 		return new Series(productIntegerPart, productRootList);
 	}
 
@@ -259,7 +260,7 @@ public class Series implements Constructible {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		boolean nonZeroIntegerPart = !integerPart.equals(ZInteger.ZERO);
+		boolean nonZeroIntegerPart = integerPart.signum() != 0;
 		sb.append(nonZeroIntegerPart ? integerPart.toString() : rootList.get(0));
 		for (int i = nonZeroIntegerPart ? 0 : 1; i < rootList.size(); ++i) {
 			if (rootList.get(i).coefficient.value.signum() == 1) {

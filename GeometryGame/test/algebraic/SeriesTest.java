@@ -175,11 +175,21 @@ public class SeriesTest {
 	}
 
 	@Test
+	public void testMultiplyZeroIsZero() {
+		assertEquals(ZInteger.ZERO, ZInteger.ONE.add(SquareRoot.of(2)).multiply(ZInteger.ZERO));
+	}
+
+	@Test
 	public void testMultiplyRoot() {
 		Constructible series = ZInteger.ONE.add(SquareRoot.of(2)).add(SquareRoot.of(3));
 		Series product = (Series) series.multiply(SquareRoot.of(2));
 		assertEquals(ZInteger.TWO, product.integerPart);
 		assertContainsAll(Arrays.asList(SquareRoot.of(2), SquareRoot.of(6)), product.rootList);
+	}
+
+	@Test
+	public void testMultiplyRootInSeries() {
+		assertEquals(ZInteger.TWO.add(SquareRoot.of(6)), SquareRoot.of(2).add(SquareRoot.of(3)).multiply(SquareRoot.of(2)));
 	}
 
 	@Test

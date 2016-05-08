@@ -34,7 +34,7 @@ public class SquareRoot implements Constructible {
 	}
 
 	private static Constructible ofInteger(ZInteger radicand) {
-		if (radicand.equals(ZInteger.ZERO)) {
+		if (radicand.signum() == 0) {
 			return ZInteger.ZERO;
 		}
 		Pair<BigInteger> coefficientSqrt = findSquareDivisors(radicand.value);
@@ -53,7 +53,7 @@ public class SquareRoot implements Constructible {
 
 	private static Constructible ofSeries(Series radicand) {
 		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("SquareRoot.of(" + radicand + ")");
 	}
 
 	private static Constructible ofRational(CRational radicand) {
@@ -118,7 +118,7 @@ public class SquareRoot implements Constructible {
 	public Constructible multiply(Constructible multiplier) {
 		switch (multiplier.getType()) {
 		case INTEGER:
-			return new SquareRoot((ZInteger) coefficient.multiply(multiplier), radicand);
+			return multiplier.signum() == 0 ? ZInteger.ZERO : new SquareRoot((ZInteger) coefficient.multiply(multiplier), radicand);
 		case SQUARE_ROOT:
 			SquareRoot sqrtMultiplier = (SquareRoot) multiplier;
 			return coefficient.multiply(sqrtMultiplier.coefficient).multiply(SquareRoot.of(radicand.multiply(sqrtMultiplier.radicand))); // a*sqrt(b)*c*sqrt(d) = a*c*sqrt(b*d)

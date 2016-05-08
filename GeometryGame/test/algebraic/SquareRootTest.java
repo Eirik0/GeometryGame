@@ -141,6 +141,11 @@ public class SquareRootTest {
 		assertEquals(SquareRoot.of(6), SquareRoot.of(2).multiply(SquareRoot.of(3)));
 	}
 
+	@Test
+	public void testMultiplyZeroIsZero() {
+		assertEquals(ZInteger.ZERO, SquareRoot.of(2).multiply(ZInteger.ZERO));
+	}
+
 	// Divide
 	@Test
 	public void testDivideSquareRootIsRoot() {
