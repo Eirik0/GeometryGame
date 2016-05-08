@@ -12,6 +12,9 @@ public class ConstructionColors {
 	private static final Color INTERSECTION_COLOR = Color.BLACK;
 	private static final Color LINE_AND_CIRCLE_COLOR = Color.GRAY;
 
+	public static final Color INTERSECTION_SELECTION_COLOR = Color.RED;
+	public static final Color PREVIEW_LINE_OR_CIRCLE_COLOR = Color.LIGHT_GRAY;
+
 	public static Color getBackgroundColor() {
 		return BACKGROUND_COLOR;
 	}
@@ -34,5 +37,13 @@ public class ConstructionColors {
 
 	public static Color getLineAndCircleColor() {
 		return LINE_AND_CIRCLE_COLOR;
+	}
+
+	public static Color getIntersectionSelectionColor() {
+		return INTERSECTION_SELECTION_COLOR;
+	}
+
+	public static Color getPreviewLineOrCircleColor() {
+		return PREVIEW_LINE_OR_CIRCLE_COLOR;
 	}
 }

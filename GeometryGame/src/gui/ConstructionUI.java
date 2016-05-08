@@ -37,6 +37,27 @@ public class ConstructionUI {
 		state = new ReadyToDrawState(this);
 	}
 
+	public void setState(ConstructionUIState state) {
+		this.state = state;
+	}
+
+	public void handleEvent(UserEvent event, int x, int y) {
+		switch (event) {
+		case SCROLL_UP:
+			zoom(0.9);
+			break;
+		case SCROLL_DOWN:
+			zoom(1.1);
+			break;
+		default:
+			state.handleEvent(event, x, y);
+		}
+	}
+
+	public void addLineOrCircle(LineOrCircle lineOrCircle) {
+		construction.draw(lineOrCircle);
+	}
+
 	public void setSize(int width, int height) {
 		double dx = (width - image.getWidth()) / pixelsPerUnit;
 		double dy = (height - image.getHeight()) / pixelsPerUnit;
@@ -45,18 +66,6 @@ public class ConstructionUI {
 		x0 -= dx / 2;
 		y0 -= dy / 2;
 		image.setSize(width, height);
-	}
-
-	public void handleEvent(UserEvent event, int x, int y) {
-		state.handleEvent(event, x, y);
-	}
-
-	public void setState(ConstructionUIState state) {
-		this.state = state;
-	}
-
-	public void addLineOrCircle(LineOrCircle lineOrCircle) {
-		construction.draw(lineOrCircle);
 	}
 
 	public void zoom(double zoom) {
@@ -89,18 +98,22 @@ public class ConstructionUI {
 	public void drawLinesAndCircles() {
 		image.setColor(ConstructionColors.getLineAndCircleColor());
 		for (LineOrCircle lineOrCircle : construction.getLinesAndCircles()) {
-			if (lineOrCircle instanceof CLine) {
-				LineType lineType = ((CLine) lineOrCircle).getType();
-				if (lineType == LineType.HORIZONTAL) {
-					drawHorizontalLine((HorizontalLine) lineOrCircle);
-				} else if (lineType == LineType.VERTICAL) {
-					drawVerticalLine((VerticalLine) lineOrCircle);
-				} else {
-					drawSlopedLine((SlopedLine) lineOrCircle);
-				}
+			drawLineOrCircle(lineOrCircle);
+		}
+	}
+
+	public void drawLineOrCircle(LineOrCircle lineOrCircle) {
+		if (lineOrCircle instanceof CLine) {
+			LineType lineType = ((CLine) lineOrCircle).getType();
+			if (lineType == LineType.HORIZONTAL) {
+				drawHorizontalLine((HorizontalLine) lineOrCircle);
+			} else if (lineType == LineType.VERTICAL) {
+				drawVerticalLine((VerticalLine) lineOrCircle);
 			} else {
-				drawCircle((CCircle) lineOrCircle);
+				drawSlopedLine((SlopedLine) lineOrCircle);
 			}
+		} else {
+			drawCircle((CCircle) lineOrCircle);
 		}
 	}
 

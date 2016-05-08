@@ -18,9 +18,9 @@ public class ReadyToDrawState implements ConstructionUIState {
 		userState = new UserState();
 		buttons = new ArrayList<>();
 		// Draw Line button
-		buttons.add(new DrawButton("LINE", 1.0 / 8, () -> ui.setState(new DrawState(ui, points -> ui.addLineOrCircle(CLine.newLine(points.first, points.second))))));
+		buttons.add(new DrawButton("LINE", 1.0 / 8, () -> ui.setState(new DrawState(ui, points -> CLine.newLine(points.first, points.second)))));
 		// Draw Circle button
-		buttons.add(new DrawButton("CIRCLE", 5.0 / 8, () -> ui.setState(new DrawState(ui, points -> ui.addLineOrCircle(new CCircle(points.first, points.second))))));
+		buttons.add(new DrawButton("CIRCLE", 5.0 / 8, () -> ui.setState(new DrawState(ui, points -> new CCircle(points.first, points.second)))));
 	}
 
 	@Override
@@ -43,12 +43,6 @@ public class ReadyToDrawState implements ConstructionUIState {
 				userState.buttonPressed.getAction().run();
 			}
 			userState.buttonPressed = null;
-			break;
-		case SCROLL_UP:
-			ui.zoom(0.9);
-			break;
-		case SCROLL_DOWN:
-			ui.zoom(1.1);
 			break;
 		default:
 		}

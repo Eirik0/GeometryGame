@@ -1,21 +1,21 @@
 package gui;
 
-import java.awt.Color;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 import algebraic.Pair;
 import geometric.CPoint;
+import geometric.LineOrCircle;
 
 public class DrawState implements ConstructionUIState {
 	private final ConstructionUI ui;
-	private final Consumer<Pair<CPoint>> pointsConsumer;
+	private final Function<Pair<CPoint>, LineOrCircle> lineOrCircleFunction;
 
 	private CPoint nearestIntersection;
 	private CPoint point1;
 
-	public DrawState(ConstructionUI ui, Consumer<Pair<CPoint>> pointsConsumer) {
+	public DrawState(ConstructionUI ui, Function<Pair<CPoint>, LineOrCircle> lineOrCircleFunction) {
 		this.ui = ui;
-		this.pointsConsumer = pointsConsumer;
+		this.lineOrCircleFunction = lineOrCircleFunction;
 	}
 
 	@Override
@@ -26,11 +26,11 @@ public class DrawState implements ConstructionUIState {
 			nearestIntersection = ui.findIntersectionNearest(x, y);
 			break;
 		case LEFT_CLICK_RELEASED:
-			CPoint point = ui.findIntersectionNearest(x, y);
+			nearestIntersection = ui.findIntersectionNearest(x, y);
 			if (point1 == null) {
-				point1 = point;
+				point1 = nearestIntersection;
 			} else {
-				pointsConsumer.accept(Pair.valueOf(point1, point));
+				ui.addLineOrCircle(lineOrCircleFunction.apply(Pair.valueOf(point1, nearestIntersection)));
 				ui.setState(new ReadyToDrawState(ui));
 			}
 			break;
@@ -42,13 +42,20 @@ public class DrawState implements ConstructionUIState {
 	public void draw() {
 		ui.drawLinesAndCircles();
 		ui.drawIntersections();
-		highlightIntersection(nearestIntersection);
-		highlightIntersection(point1);
+		if (point1 == null) {
+			highlightIntersection(nearestIntersection);
+		} else {
+			highlightIntersection(point1);
+			if (!point1.equals(nearestIntersection)) {
+				ui.image.setColor(ConstructionColors.getPreviewLineOrCircleColor());
+				ui.drawLineOrCircle(lineOrCircleFunction.apply(Pair.valueOf(point1, nearestIntersection)));
+			}
+		}
 	}
 
 	private void highlightIntersection(CPoint intersection) {
 		if (intersection != null) {
-			ui.image.setColor(Color.RED);
+			ui.image.setColor(ConstructionColors.getIntersectionSelectionColor());
 			int x = ui.transformX(intersection.x.doubleValue());
 			int y = ui.transformY(intersection.y.doubleValue());
 			ui.image.drawCircle(x - 5, y - 5, 10, 10);
