@@ -151,6 +151,7 @@ public class Series implements Constructible {
 	private Constructible multiplySquareRoot(SquareRoot multiplier) {
 		ZInteger productIntegerPart = ZInteger.ZERO;
 		List<SquareRoot> productRootList = new ArrayList<>();
+		List<Series> additionalSeries = new ArrayList<>();
 		if (integerPart.signum() != 0) { // nonzero coefficient
 			productRootList.add(new SquareRoot((ZInteger) integerPart.multiply(multiplier.coefficient), multiplier.radicand));
 		}
@@ -158,11 +159,19 @@ public class Series implements Constructible {
 			Constructible sqrtProduct = squareRoot.multiply(multiplier);
 			if (sqrtProduct.getType() == ConstructibleType.SQUARE_ROOT) {
 				productRootList.add((SquareRoot) sqrtProduct);
-			} else { // If the product of two square roots is not a square root, it is an integer
-				productIntegerPart = (ZInteger) productIntegerPart.add(sqrtProduct);
+			} else { // If the product of two square roots is not a square root, it is either an integer or a series
+				if (sqrtProduct.getType() == ConstructibleType.INTEGER) {
+					productIntegerPart = (ZInteger) productIntegerPart.add(sqrtProduct);
+				} else {
+					additionalSeries.add((Series) sqrtProduct);
+				}
 			}
 		}
-		return new Series(productIntegerPart, productRootList);
+		Constructible product = productIntegerPart.equals(ZInteger.ZERO) && productRootList.size() == 1 ? productRootList.get(0) : new Series(productIntegerPart, productRootList);
+		for (Series series : additionalSeries) {
+			product = product.add(series);
+		}
+		return product;
 	}
 
 	private Constructible multiplySeries(Series multiplier) {

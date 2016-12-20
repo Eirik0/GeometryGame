@@ -186,8 +186,8 @@ public class SquareRootTest {
 
 	@Test
 	public void testToString() {
-		assertEquals("sqrt(2)", SquareRoot.of(2).toString());
-		assertEquals("-sqrt(2)", SquareRoot.of(2).negate().toString());
-		assertEquals("2sqrt(2)", SquareRoot.of(8).toString());
+		assertEquals(SquareRoot.SQRT_CHAR + "(2)", SquareRoot.of(2).toString());
+		assertEquals("-" + SquareRoot.SQRT_CHAR + "(2)", SquareRoot.of(2).negate().toString());
+		assertEquals("2" + SquareRoot.SQRT_CHAR + "(2)", SquareRoot.of(8).toString());
 	}
 }

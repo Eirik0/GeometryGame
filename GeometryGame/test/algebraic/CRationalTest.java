@@ -97,6 +97,6 @@ public class CRationalTest {
 	@Test
 	public void testToString() {
 		assertEquals("1/2", CRational.quotientOf(1, 2).toString());
-		assertEquals("(1+sqrt(2))/2", ZInteger.ONE.add(SquareRoot.of(2)).divide(ZInteger.TWO).toString());
+		assertEquals("(1+" + SquareRoot.SQRT_CHAR + "(2))/2", ZInteger.ONE.add(SquareRoot.of(2)).divide(ZInteger.TWO).toString());
 	}
 }

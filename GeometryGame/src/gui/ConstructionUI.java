@@ -204,8 +204,7 @@ public class ConstructionUI {
 		Iterator<CPoint> intersectionIter = intersections.iterator();
 		while (intersectionIter.hasNext()) {
 			CPoint secondIntersection = intersectionIter.next();
-			LineOrCircle apply = lineOrCircleFunction.apply(Pair.valueOf(firstIntersection, secondIntersection));
-			if (construction.getLinesAndCircles().contains(apply)) {
+			if (construction.getLinesAndCircles().contains(lineOrCircleFunction.apply(Pair.valueOf(firstIntersection, secondIntersection)))) {
 				intersectionIter.remove();
 			}
 		}

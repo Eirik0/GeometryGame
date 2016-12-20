@@ -7,6 +7,7 @@ public class ZInteger implements Constructible {
 	public static final ZInteger ZERO = ZInteger.valueOf(0);
 	public static final ZInteger ONE = ZInteger.valueOf(1);
 	public static final ZInteger TWO = ZInteger.valueOf(2);
+	public static final ZInteger FOUR = ZInteger.valueOf(4);
 
 	public final BigInteger value;
 

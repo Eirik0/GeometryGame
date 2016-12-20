@@ -14,7 +14,7 @@ public class IntersectionSet {
 		return emptySet;
 	}
 
-	public IntersectionSet() {
+	private IntersectionSet() {
 		intersections = new CPoint[0];
 	}
 

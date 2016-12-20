@@ -1,10 +1,15 @@
 package algebraic;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class SquareRoot implements Constructible {
+	public static final String SQRT_CHAR = "sqrt"; // "\u221A"
+
 	private static final BigInteger TWO = BigInteger.valueOf(2);
 	private static final BigInteger FOUR = BigInteger.valueOf(4);
 
@@ -52,8 +57,83 @@ public class SquareRoot implements Constructible {
 	}
 
 	private static Constructible ofSeries(Series radicand) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("SquareRoot.of(" + radicand + ")");
+		if (radicand.rootList.size() == 1) {
+			return ofOneRootSeries(radicand);
+		} else {
+			for (int i = 0; i < radicand.rootList.size() - 1; ++i) {
+				Constructible denested = tryDenest(radicand, new HashSet<SquareRoot>(), new HashSet<>(radicand.rootList), 0, i);
+				if (denested != null) {
+					return denested;
+				}
+			}
+		}
+		return ofSeriesDoesNotDenest(radicand);
+	}
+
+	private static Constructible ofOneRootSeries(Series radicand) {
+		if (radicand.integerPart.signum() < 0) {
+			// (a + sqrt(c))^2 = a*2 + c + 2*a*sqrt(c)
+			// a*2 + c can only be negative if c is negative
+			return ofSeriesDoesNotDenest(radicand);
+		} else {
+			// Let x = a + b*sqrt(c)
+			// Let norm(x) = a^2 - (b^2)*c
+			// Let d = (a + sqrt(norm(x)))/2
+			// Let e = (a - sqrt(norm(x)))/2
+			// sqrt(x) = sqrt(d) + sqrt(e)
+			Constructible norm = radicand.integerPart.squared().subtract(radicand.rootList.get(0).squared());
+			if (norm.signum() < 0) {
+				return ofSeriesDoesNotDenest(radicand);
+			} else {
+				Constructible sqrt_n = SquareRoot.of(norm);
+				if (sqrt_n.getType() == ConstructibleType.INTEGER) {
+					Constructible sqrt_d = SquareRoot.of(radicand.integerPart.add(sqrt_n).divide(ZInteger.TWO));
+					Constructible sqrt_e = SquareRoot.of(radicand.integerPart.subtract(sqrt_n).divide(ZInteger.TWO));
+					// if x = a - b*sqrt(c) then sqrt(x) = (sqrt(d) - sqrt(e)) or (-sqrt(d) + sqrt(e))
+					// but because we are interested in the positive root it must be the former since d > e
+					return radicand.rootList.get(0).coefficient.signum() > 0 ? sqrt_d.add(sqrt_e) : sqrt_d.subtract(sqrt_e);
+				} else {
+					return ofSeriesDoesNotDenest(radicand);
+				}
+			}
+		}
+	}
+
+	private static Constructible ofSeriesDoesNotDenest(Series radicand) {
+		BigInteger gcd = radicand.integerPart.value;
+		for (SquareRoot root : radicand.rootList) {
+			gcd = CRational.gcd(gcd, root.coefficient.value.abs());
+		}
+		Pair<BigInteger> coefficientSqrt = findSquareDivisors(gcd);
+		return new SquareRoot(ZInteger.valueOf(coefficientSqrt.first), radicand.divide(ZInteger.valueOf(gcd)).multiply(ZInteger.valueOf(coefficientSqrt.second)));
+	}
+
+	private static Constructible tryDenest(Series series, Set<SquareRoot> xRoots, Set<SquareRoot> yRoots, int start, int depthRemaining) {
+		for (int i = start; i < series.rootList.size(); ++i) {
+			xRoots.add(series.rootList.get(i));
+			yRoots.remove(series.rootList.get(i));
+			if (depthRemaining == 0) {
+				// Let x + y = s where s is the series
+				// If we can find (x, y) such that x^2 - y^2 is sufficiently "simpler" than s, we will find a denesting
+				Constructible x = Series.constructibleValue(series.integerPart, new ArrayList<>(xRoots));
+				Constructible y = Series.constructibleValue(ZInteger.ZERO, new ArrayList<>(yRoots));
+				Constructible n = x.squared().subtract(y.squared());
+				if (n.getType() == ConstructibleType.INTEGER || n.getType() == ConstructibleType.SQUARE_ROOT || ((Series) n).rootList.size() <= series.rootList.size() / 2) {
+					Constructible sqrt_n = SquareRoot.of(n);
+					if (findNestedDepth(sqrt_n) <= findNestedDepth(series)) {
+						return SquareRoot.of(x.add(sqrt_n).divide(ZInteger.TWO)).add(SquareRoot.of(x.subtract(sqrt_n).divide(ZInteger.TWO)));
+					}
+				}
+			} else {
+				Constructible denested = tryDenest(series, xRoots, yRoots, i + 1, depthRemaining - 1);
+				if (denested != null) {
+					return denested;
+				}
+			}
+			yRoots.add(series.rootList.get(i));
+			xRoots.remove(series.rootList.get(i));
+		}
+		return null;
 	}
 
 	private static Constructible ofRational(CRational radicand) {
@@ -175,7 +255,7 @@ public class SquareRoot implements Constructible {
 
 	@Override
 	public String toString() {
-		return ZInteger.stringMultiply(coefficient, "sqrt(" + radicand.toString() + ")");
+		return ZInteger.stringMultiply(coefficient, SQRT_CHAR + "(" + radicand.toString() + ")");
 	}
 
 	/**

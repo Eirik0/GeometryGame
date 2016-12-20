@@ -277,7 +277,7 @@ public class SeriesTest {
 	public void testReciprocate_OnePlusRootTwoPlusRootThree() {
 		CRational reciprocal = (CRational) ZInteger.ONE.add(SquareRoot.of(2)).add(SquareRoot.of(3)).reciprocate();
 		// 1/(1+sqrt(2)+sqrt(3)) = (2+sqrt(2)-sqrt(6))/4
-		assertEquals(ZInteger.TWO.add(SquareRoot.of(2)).subtract(SquareRoot.of(6)).divide(ZInteger.valueOf(4)), reciprocal);
+		assertEquals(ZInteger.TWO.add(SquareRoot.of(2)).subtract(SquareRoot.of(6)).divide(ZInteger.FOUR), reciprocal);
 	}
 
 	@Test
@@ -285,6 +285,12 @@ public class SeriesTest {
 		CRational reciprocal = (CRational) ZInteger.ONE.add(SquareRoot.of(ZInteger.ONE.add(SquareRoot.of(2)))).reciprocate();
 		// 1/(1+sqrt(1+sqrt(2))) = (sqrt(2+2*sqrt(2))-sqrt(2))/2
 		assertEquals(SquareRoot.of(ZInteger.TWO.add(SquareRoot.of(8))).subtract(SquareRoot.of(2)).divide(ZInteger.TWO), reciprocal);
+	}
+
+	@Test
+	public void testMultiplyNested() {
+		Constructible nested = SquareRoot.of(ZInteger.ONE.add(SquareRoot.of(2)));
+		assertEquals(nested.add(ZInteger.ONE).add(SquareRoot.of(2)), ZInteger.ONE.add(nested).multiply(nested));
 	}
 
 	@Test
@@ -306,7 +312,7 @@ public class SeriesTest {
 
 	@Test
 	public void testToString() {
-		assertEquals("1+sqrt(2)-sqrt(3)", ZInteger.ONE.add(SquareRoot.of(2)).subtract(SquareRoot.of(3)).toString());
-		assertEquals("sqrt(2)+sqrt(3)", SquareRoot.of(2).add(SquareRoot.of(3)).toString());
+		assertEquals("1+" + SquareRoot.SQRT_CHAR + "(2)-" + SquareRoot.SQRT_CHAR + "(3)", ZInteger.ONE.add(SquareRoot.of(2)).subtract(SquareRoot.of(3)).toString());
+		assertEquals(SquareRoot.SQRT_CHAR + "(2)+" + SquareRoot.SQRT_CHAR + "(3)", SquareRoot.of(2).add(SquareRoot.of(3)).toString());
 	}
 }
