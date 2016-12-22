@@ -2,6 +2,7 @@ package algebraic;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import algebraic.Constructible.ConstructibleType;
@@ -21,17 +22,22 @@ public class SquareRootDenestTest {
 		testDoesNotDenest(radicand, ZInteger.ONE, radicand);
 	}
 
-	private void testDoesNotDenest(Constructible radicand, Constructible expectedCoefficient, Constructible expectedRadicant) {
+	private void testDoesNotDenest(Constructible radicand, Constructible expectedCoefficient, Constructible expectedRadicand) {
 		Constructible constructible = SquareRoot.of(radicand);
 		assertEquals(ConstructibleType.SQUARE_ROOT, constructible.getType());
 		SquareRoot sqrt = (SquareRoot) constructible;
 		assertEquals(expectedCoefficient, sqrt.coefficient);
-		assertEquals(expectedRadicant, sqrt.radicand);
+		assertEquals(expectedRadicand, sqrt.radicand);
 	}
 
 	@Test
 	public void testTwoPlusRootTwo() {
 		testDoesNotDenest(ZInteger.TWO.add(SquareRoot.of(2)));
+	}
+
+	@Test
+	public void testRootTwoPlusRootThree() {
+		testDoesNotDenest(SquareRoot.of(2).add(SquareRoot.of(3)));
 	}
 
 	@Test
@@ -61,16 +67,47 @@ public class SquareRootDenestTest {
 	}
 
 	@Test
+	public void testIntegerMinusTwoRootsSquared() {
+		Constructible series = ZInteger.valueOf(10).subtract(SquareRoot.of(2)).subtract(SquareRoot.of(3));
+		assertEquals(series, SquareRoot.of(series.squared()));
+	}
+
+	@Test
 	public void testIntegerPlusTwoRootsSquaredDoesNotDenest() {
-		Constructible series = ZInteger.TWO.add(SquareRoot.of(2)).add(SquareRoot.of(3));
-		SquareRoot sqrt = (SquareRoot) SquareRoot.of(series);
-		assertEquals(ZInteger.ONE, sqrt.coefficient);
-		assertEquals(series, sqrt.radicand);
+		testDoesNotDenest(ZInteger.TWO.add(SquareRoot.of(2)).add(SquareRoot.of(3)));
 	}
 
 	@Test
 	public void testIntegerPlusThreeRootsSquared() {
 		Constructible series = ZInteger.ONE.add(SquareRoot.of(2)).add(SquareRoot.of(3)).add(SquareRoot.of(5));
 		assertEquals(series, SquareRoot.of(series.squared()));
+	}
+
+	@Test
+	@Ignore
+	public void testIntegerPlusFourRootsSquared() {
+		Constructible series = ZInteger.ONE.add(SquareRoot.of(2)).add(SquareRoot.of(3)).add(SquareRoot.of(5).add(SquareRoot.of(7)));
+		assertEquals(series, SquareRoot.of(series.squared()));
+	}
+
+	@Test
+	@Ignore
+	public void testNestedDenesting() {
+		Constructible series = ZInteger.ONE.add(SquareRoot.of(2)).add(SquareRoot.of(ZInteger.ONE.add(SquareRoot.of(2)))).add(SquareRoot.of(SquareRoot.of(2).add(SquareRoot.of(3))));
+		Constructible squared = series.squared();
+		System.out.println(squared);
+		assertEquals(series, SquareRoot.of(squared));
+	}
+
+	@Test
+	public void testNestedDenestingDoesNotDenest() {
+		testDoesNotDenest(ZInteger.valueOf(9).subtract(SquareRoot.of(9 * 5)).add(SquareRoot.of(ZInteger.valueOf(121).subtract(SquareRoot.of(52 * 52 * 5)))));
+	}
+
+	@Test
+	public void testThreeRootsDoesNotDenest() {
+		Constructible series = ZInteger.valueOf(16).add(SquareRoot.of(12 * 12 * 3)).add(SquareRoot.of(8 * 8 * 6)).add(SquareRoot.of(12 * 12 * 2));
+		Constructible expectedRadicand = ZInteger.valueOf(4).add(SquareRoot.of(3 * 3 * 3)).add(SquareRoot.of(2 * 2 * 6)).add(SquareRoot.of(3 * 3 * 2));
+		testDoesNotDenest(series, ZInteger.TWO, expectedRadicand);
 	}
 }

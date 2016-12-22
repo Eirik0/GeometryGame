@@ -4,8 +4,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 public class SquareRoot implements Constructible {
 	public static final String SQRT_CHAR = "sqrt"; // "\u221A"
@@ -60,14 +59,8 @@ public class SquareRoot implements Constructible {
 		if (radicand.rootList.size() == 1) {
 			return ofOneRootSeries(radicand);
 		} else {
-			for (int i = 0; i < radicand.rootList.size() - 1; ++i) {
-				Constructible denested = tryDenest(radicand, new HashSet<SquareRoot>(), new HashSet<>(radicand.rootList), 0, i);
-				if (denested != null) {
-					return denested;
-				}
-			}
+			return tryDenest(radicand);
 		}
-		return ofSeriesDoesNotDenest(radicand);
 	}
 
 	private static Constructible ofOneRootSeries(Series radicand) {
@@ -75,18 +68,25 @@ public class SquareRoot implements Constructible {
 			// (a + sqrt(c))^2 = a*2 + c + 2*a*sqrt(c)
 			// a*2 + c can only be negative if c is negative
 			return ofSeriesDoesNotDenest(radicand);
+		} else if (radicand.rootList.get(0).radicand.getType() != ConstructibleType.INTEGER) {
+			// Let x = a + b^(1/2^n) with a and b integers and n > 1
+			// Let sqrt(x) = c + d such that the addition of c and d is irreducible
+			// c^2 + d^2 + 2*c*d = a + b^(1/2^n)
+			// Assuming a = c^2 or a = c^2 + d^2 both lead to contradictions because c must be a square root
+			return ofSeriesDoesNotDenest(radicand);
 		} else {
 			// Let x = a + b*sqrt(c)
 			// Let norm(x) = a^2 - (b^2)*c
 			// Let d = (a + sqrt(norm(x)))/2
 			// Let e = (a - sqrt(norm(x)))/2
 			// sqrt(x) = sqrt(d) + sqrt(e)
-			Constructible norm = radicand.integerPart.squared().subtract(radicand.rootList.get(0).squared());
+			ZInteger norm = (ZInteger) radicand.integerPart.squared().subtract(radicand.rootList.get(0).squared());
 			if (norm.signum() < 0) {
 				return ofSeriesDoesNotDenest(radicand);
 			} else {
-				Constructible sqrt_n = SquareRoot.of(norm);
-				if (sqrt_n.getType() == ConstructibleType.INTEGER) {
+				BigInteger iSqrt = iSqrt(norm.value);
+				if (iSqrt.multiply(iSqrt).equals(norm.value)) {
+					Constructible sqrt_n = ZInteger.valueOf(iSqrt);
 					Constructible sqrt_d = SquareRoot.of(radicand.integerPart.add(sqrt_n).divide(ZInteger.TWO));
 					Constructible sqrt_e = SquareRoot.of(radicand.integerPart.subtract(sqrt_n).divide(ZInteger.TWO));
 					// if x = a - b*sqrt(c) then sqrt(x) = (sqrt(d) - sqrt(e)) or (-sqrt(d) + sqrt(e))
@@ -108,32 +108,64 @@ public class SquareRoot implements Constructible {
 		return new SquareRoot(ZInteger.valueOf(coefficientSqrt.first), radicand.divide(ZInteger.valueOf(gcd)).multiply(ZInteger.valueOf(coefficientSqrt.second)));
 	}
 
-	private static Constructible tryDenest(Series series, Set<SquareRoot> xRoots, Set<SquareRoot> yRoots, int start, int depthRemaining) {
-		for (int i = start; i < series.rootList.size(); ++i) {
-			xRoots.add(series.rootList.get(i));
-			yRoots.remove(series.rootList.get(i));
-			if (depthRemaining == 0) {
-				// Let x + y = s where s is the series
-				// If we can find (x, y) such that x^2 - y^2 is sufficiently "simpler" than s, we will find a denesting
-				Constructible x = Series.constructibleValue(series.integerPart, new ArrayList<>(xRoots));
-				Constructible y = Series.constructibleValue(ZInteger.ZERO, new ArrayList<>(yRoots));
-				Constructible n = x.squared().subtract(y.squared());
-				if (n.getType() == ConstructibleType.INTEGER || n.getType() == ConstructibleType.SQUARE_ROOT || ((Series) n).rootList.size() <= series.rootList.size() / 2) {
-					Constructible sqrt_n = SquareRoot.of(n);
-					if (findNestedDepth(sqrt_n) <= findNestedDepth(series)) {
-						return SquareRoot.of(x.add(sqrt_n).divide(ZInteger.TWO)).add(SquareRoot.of(x.subtract(sqrt_n).divide(ZInteger.TWO)));
-					}
-				}
-			} else {
-				Constructible denested = tryDenest(series, xRoots, yRoots, i + 1, depthRemaining - 1);
-				if (denested != null) {
-					return denested;
+	private static Constructible tryDenest(Series series) {
+		int termsInSeries = numTerms(series);
+		int seriesDepth = findNestedDepth(series);
+		boolean[] sublistDefinition = new boolean[series.rootList.size()];
+		increment(sublistDefinition);
+		for (;;) {
+			List<SquareRoot> xRoots = new ArrayList<>();
+			List<SquareRoot> yRoots = new ArrayList<>();
+			for (int i = 0; i < sublistDefinition.length; ++i) {
+				if (sublistDefinition[i]) {
+					xRoots.add(series.rootList.get(i));
+				} else {
+					yRoots.add(series.rootList.get(i));
 				}
 			}
-			yRoots.add(series.rootList.get(i));
-			xRoots.remove(series.rootList.get(i));
+			// If we do not increment then yRoots is empty
+			if (!increment(sublistDefinition)) {
+				return ofSeriesDoesNotDenest(series);
+			}
+			// Let x + y = s where s is the series
+			// If we can find nonzero (x, y) such that x^2 - y^2 is sufficiently "simpler", we will find a denesting
+			Constructible x = Series.constructibleValue(series.integerPart, xRoots);
+			Constructible y = Series.constructibleValue(ZInteger.ZERO, yRoots);
+			Constructible n = x.squared().subtract(y.squared());
+			int numTerms = numTerms(n);
+			if (numTerms < termsInSeries) {
+				if (n.signum() >= 0) {
+					Constructible sqrt_n = SquareRoot.of(n);
+					Constructible d = x.add(sqrt_n);
+					Constructible e = x.subtract(sqrt_n);
+					if (findNestedDepth(d) <= seriesDepth && findNestedDepth(e) <= seriesDepth) {
+						if (numTerms(d) < termsInSeries && numTerms(e) < termsInSeries) {
+							Constructible sqrt_d_div_root_2 = SquareRoot.of(d.divide(ZInteger.TWO));
+							Constructible sqrt_e_div_root_2 = SquareRoot.of(e.divide(ZInteger.TWO));
+							if (findNestedDepth(sqrt_d_div_root_2) <= seriesDepth && findNestedDepth(sqrt_e_div_root_2) <= seriesDepth) {
+								return y.signum() > 0 ? sqrt_d_div_root_2.add(sqrt_e_div_root_2) : sqrt_d_div_root_2.subtract(sqrt_e_div_root_2);
+							}
+						}
+					}
+				}
+			}
 		}
-		return null;
+	}
+
+	private static boolean increment(boolean[] bools) {
+		if (!bools[0]) {
+			bools[0] = true;
+			return true;
+		} else {
+			for (int i = 0; i < bools.length - 1; ++i) {
+				bools[i] = false;
+				if (!bools[i + 1]) {
+					bools[i + 1] = true;
+					return true;
+				}
+			}
+			return false;
+		}
 	}
 
 	private static Constructible ofRational(CRational radicand) {
@@ -325,6 +357,21 @@ public class SquareRoot implements Constructible {
 				max = Math.max(max, findNestedDepth(squareRoot));
 			}
 			return max;
+		}
+	}
+
+	private static int numTerms(Constructible n) {
+		switch (n.getType()) {
+		case INTEGER:
+			return 1;
+		case SQUARE_ROOT:
+			return 1;
+		case SERIES:
+			Series series = (Series) n;
+			return series.rootList.size() + (series.integerPart.signum() == 0 ? 0 : 1);
+		case RATIONAL:
+		default:
+			return numTerms(((CRational) n).numerator);
 		}
 	}
 }
