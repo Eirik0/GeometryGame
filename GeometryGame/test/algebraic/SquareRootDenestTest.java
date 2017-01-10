@@ -110,13 +110,13 @@ public class SquareRootDenestTest {
 	}
 
 	@Test
-	public void testDenestIfCancellationsWhenSquaring_1() { // Project Euler problem 858 3rd example
+	public void testDenestIfCancellationsWhenSquaring_1() { // Project Euler problem 585 3rd example
 		Constructible series = ZInteger.valueOf(3).add(SquareRoot.of(6)).add(SquareRoot.of(3)).subtract(SquareRoot.of(2));
 		assertEquals(series, SquareRoot.of(series.squared()));
 	}
 
 	@Test
-	public void testDenestIfCancellationsWhenSquaring_2() { // Project Euler problem 858 4th example
+	public void testDenestIfCancellationsWhenSquaring_2() { // Project Euler problem 585 4th example
 		Constructible series = SquareRoot.of(15).add(SquareRoot.of(6)).add(SquareRoot.of(5)).subtract(SquareRoot.of(2));
 		assertEquals(series, SquareRoot.of(series.squared()));
 	}
