@@ -94,9 +94,7 @@ public class SquareRootDenestTest {
 	@Ignore
 	public void testNestedDenesting() {
 		Constructible series = ZInteger.ONE.add(SquareRoot.of(2)).add(SquareRoot.of(ZInteger.ONE.add(SquareRoot.of(2)))).add(SquareRoot.of(SquareRoot.of(2).add(SquareRoot.of(3))));
-		Constructible squared = series.squared();
-		System.out.println(squared);
-		assertEquals(series, SquareRoot.of(squared));
+		assertEquals(series, SquareRoot.of(series.squared()));
 	}
 
 	@Test
@@ -109,5 +107,17 @@ public class SquareRootDenestTest {
 		Constructible series = ZInteger.valueOf(16).add(SquareRoot.of(12 * 12 * 3)).add(SquareRoot.of(8 * 8 * 6)).add(SquareRoot.of(12 * 12 * 2));
 		Constructible expectedRadicand = ZInteger.valueOf(4).add(SquareRoot.of(3 * 3 * 3)).add(SquareRoot.of(2 * 2 * 6)).add(SquareRoot.of(3 * 3 * 2));
 		testDoesNotDenest(series, ZInteger.TWO, expectedRadicand);
+	}
+
+	@Test
+	public void testDenestIfCancellationsWhenSquaring_1() { // Project Euler problem 858 3rd example
+		Constructible series = ZInteger.valueOf(3).add(SquareRoot.of(6)).add(SquareRoot.of(3)).subtract(SquareRoot.of(2));
+		assertEquals(series, SquareRoot.of(series.squared()));
+	}
+
+	@Test
+	public void testDenestIfCancellationsWhenSquaring_2() { // Project Euler problem 858 4th example
+		Constructible series = SquareRoot.of(15).add(SquareRoot.of(6)).add(SquareRoot.of(5)).subtract(SquareRoot.of(2));
+		assertEquals(series, SquareRoot.of(series.squared()));
 	}
 }
