@@ -5,9 +5,6 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import gg.algebraic.Constructible;
-import gg.algebraic.SquareRoot;
-import gg.algebraic.ZInteger;
 import gg.algebraic.Constructible.ConstructibleType;
 
 public class SquareRootDenestTest {
@@ -21,11 +18,11 @@ public class SquareRootDenestTest {
         assertEquals(ZInteger.valueOf(-2).add(SquareRoot.of(4 * 5)), SquareRoot.of(ZInteger.valueOf(24).subtract(SquareRoot.of(64 * 5))));
     }
 
-    private void testDoesNotDenest(Constructible radicand) {
+    private static void testDoesNotDenest(Constructible radicand) {
         testDoesNotDenest(radicand, ZInteger.ONE, radicand);
     }
 
-    private void testDoesNotDenest(Constructible radicand, Constructible expectedCoefficient, Constructible expectedRadicand) {
+    private static void testDoesNotDenest(Constructible radicand, Constructible expectedCoefficient, Constructible expectedRadicand) {
         Constructible constructible = SquareRoot.of(radicand);
         assertEquals(ConstructibleType.SQUARE_ROOT, constructible.getType());
         SquareRoot sqrt = (SquareRoot) constructible;

@@ -6,27 +6,21 @@ import org.junit.Test;
 
 import gg.algebraic.CRational;
 import gg.algebraic.ZInteger;
-import gg.geometric.CLine;
-import gg.geometric.CPoint;
-import gg.geometric.HorizontalLine;
-import gg.geometric.IntersectionSet;
-import gg.geometric.SlopedLine;
-import gg.geometric.VerticalLine;
 import gg.geometric.CLine.LineType;
 
 public class CLineTest {
     /** Horizontal **/
-    private CLine yEquals(long y) {
+    private static CLine yEquals(long y) {
         return CLine.newLine(CPoint.newPoint(0, y), CPoint.newPoint(1, y));
     }
 
     /** Vertical **/
-    private CLine xEquals(long x) {
+    private static CLine xEquals(long x) {
         return CLine.newLine(CPoint.newPoint(x, 0), CPoint.newPoint(x, 1));
     }
 
     /** Sloped **/
-    private CLine yEquals_xPlusOne() {
+    private static CLine yEquals_xPlusOne() {
         return CLine.newLine(CPoint.newPoint(0, 1), CPoint.newPoint(1, 2));
     }
 
